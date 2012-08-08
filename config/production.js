@@ -9,5 +9,7 @@ module.exports = {
 
     monitor: {
             apiUrl: process.env.API_URL
-    }
+    },
+
+    autoStartMonitor: false
 };
