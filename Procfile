@@ -1,1 +1,1 @@
-web: node monitor.js
+web: node app.js
