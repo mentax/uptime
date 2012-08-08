@@ -5,5 +5,9 @@ module.exports = {
 
     mongodb: {
         connectionString: process.env.MONGOHQ_URL
+    },
+
+    monitor: {
+            apiUrl: process.env.API_URL
     }
 };
