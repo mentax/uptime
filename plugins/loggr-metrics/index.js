@@ -39,7 +39,6 @@ exports.initWebApp = function(options) {
     var dashboard = options.dashboard;
 
     dashboard.on('populateFromDirtyCheck', function(checkDocument, dirtyCheck, type) {
-        //if (type !== 'http' && type !== 'https') return;
         var match = dirtyCheck.match;
         if (match) {
             if (match.indexOf('/') === 0) {
@@ -66,6 +65,7 @@ exports.initWebApp = function(options) {
     var config = options.config;
 
     CheckEvent.on('afterInsert', function(checkEvent) {
+return;
         var webhooks = config.webhooks;
         var hrefs = webhooks.event[checkEvent.message];
 
@@ -87,7 +87,6 @@ exports.initWebApp = function(options) {
             req.end();
         });
     });
-    console.log('Enabled loggr-metrics plugin');
 };
 
 exports.initMonitor = function(options) {
@@ -137,7 +136,8 @@ exports.initMonitor = function(options) {
         var post_req = http.request(post_options, function(res) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
+		if (trim(chunk) != "")
+                    console.log('Response: ' + chunk);
             });
         });
 
@@ -147,3 +147,7 @@ exports.initMonitor = function(options) {
     });
 
 };
+
+function trim (str) {
+    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+}
