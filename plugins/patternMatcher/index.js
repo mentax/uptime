@@ -57,7 +57,7 @@ exports.initWebApp = function(options) {
 
 exports.initMonitor = function(options) {
 
-  options.monitor.on('pollerPolled', function(check, res, details) {
+  options.monitor.on('pollerPolled', function(check, time, res, details) {
     if (check.type !== 'http' && check.type !== 'https') return;
     var pattern = check.pollerParams && check.pollerParams.match;
     if (!pattern) return;
