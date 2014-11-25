@@ -18,7 +18,7 @@
   Latest events
 </h1>
 <div id="events">
-  <%- partial('_status_events', { url: '/api/pings/events', route: route }) %>
+  <%- partial('_status_events', { url: '/api/pings/events?tag='+tag, route: route }) %>
 </div>
 <script id="check_template" type="text/template">
 <tr>
@@ -73,7 +73,7 @@ jQuery(document).ready(function($) {
     if (checks) {
       updateChecksSection(checks);
     } else {
-      $.getJSON('/api/checks', updateChecksSection);
+      $.getJSON('/api/checks?tag='+tag, updateChecksSection);
     }
   }
   updateChecks(<%- JSON.stringify(checks) %>);

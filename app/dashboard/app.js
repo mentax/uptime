@@ -63,7 +63,7 @@ app.get('/events', function(req, res) {
 app.get('/status/:tag', function(req, res, next) {
   Check.find({ tags: req.params.tag} ).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
     if (err) return next(err);
-    res.render('status', { layout: "status_layout.ejs", info: req.flash('info'), checks: checks });
+    res.render('status', { layout: "status_layout.ejs", info: req.flash('info'), checks: checks, tag: req.params.tag });
   });
 });
 
