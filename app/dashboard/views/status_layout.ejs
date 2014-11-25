@@ -32,10 +32,6 @@
             <ul class="nav pull-left">
               <li id="new_events"><a href="<%= route %>/events?highlightFrom=<%= Date.now() %>"></a></li> 
             </ul>
-            <ul class="nav pull-right" id="check_summary">
-              <li id="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
-              <li id="all_down" style="display: none;"><span class="label label-important">Down</span><strong class="red">0</strong></li>
-            </ul>
           </div>
         </div>
       </div>
@@ -56,30 +52,8 @@
         $('head link[rel="shortcut icon"]').remove()
         $('head').append('<link rel="shortcut icon" type="image/x-icon" href="/dashboard/favicon' + (red ? '_red' : '') + '.ico">')
       }
-      var updateCounts = function() {
-        $.getJSON('/api/checks/count', function(count) {
-          if (count.total > 0) {
-            $('#all_up').show().children('strong').text(count.up);
-          } else {
-            $('#all_up').hide();
-          }
-          if (count.down > 0) {
-            $('#all_down').show().children('strong').text(count.down);
-            changeFavicon(true);
-          } else {
-            $('#all_down').hide();
-            if (nbNewEvents > 0) {
-              changeFavicon(false);
-            }
-          }
-          if (nbNewEvents > 0) {
-            document.title = '(' + nbNewEvents +') Uptime';
-          };
-        });
-      };
       socket.on('CheckEvent', function() {
         nbNewEvents++;
-        updateCounts();
         $('#check_summary').fadeOut().fadeIn().fadeOut().fadeIn();
         $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
       });
