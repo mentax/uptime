@@ -3,8 +3,8 @@ url: 'http://localhost:8082'
 mongodb:
   server:   localhost
   database: uptime
-  user:     root 
-  password:
+  user:     admin 
+  password: admin
   connectionString:       # alternative to setting server, database, user and password separately
 
 monitor:
