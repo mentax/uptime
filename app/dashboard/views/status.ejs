@@ -12,11 +12,11 @@
 <tr>
   <td data-sort="{{= check.name }}">
     {{ if (check.isPaused) { }}
-  <span class="label label-info">&nbsp;&nbsp;&nbsp;</span> <span class="blue"></span>
+  <span class="label label-info">&nbsp;&nbsp;&nbsp;</span>
     {{ } else if (check.isUp) { }}
-  <span class="label label-success">&nbsp;&nbsp;&nbsp;</span> <span class="green"></span>
+  <span class="label label-success">&nbsp;&nbsp;&nbsp;</span>
     {{ } else { }}
-  <span class="label label-important">&nbsp;&nbsp;&nbsp;</span> <span class="red"></span>
+  <span class="label label-important">&nbsp;&nbsp;&nbsp;</span>
     {{ } }} {{= check.name }}
     <a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
   </td>
