@@ -6,31 +6,20 @@
 <div class="alert alert-success"><%= info %></div>
 <% } %>
 <table class="table" id="checks">
-  <thead>
-    <tr>
-      <th style="width:30%">Name</th>
-      <th style="width:20%">Status</th>
-    </tr>
-  </thead>
   <tbody></tbody>
 </table>
 <script id="check_template" type="text/template">
 <tr>
   <td data-sort="{{= check.name }}">
-    {{= check.name }}
+    {{ if (check.isPaused) { }}
+  <span class="label label-info">&nbsp;&nbsp;&nbsp;</span> <span class="blue"></span>
+    {{ } else if (check.isUp) { }}
+  <span class="label label-success">&nbsp;&nbsp;&nbsp;</span> <span class="green"></span>
+    {{ } else { }}
+  <span class="label label-important">&nbsp;&nbsp;&nbsp;</span> <span class="red"></span>
+    {{ } }} {{= check.name }}
     <a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
   </td>
-  {{ if (check.lastTested) { }}
-    {{ if (check.isPaused) { }}
-  <td data-sort="{{= check.isUp ? check.uptime : -check.downtime }}"><span class="label label-info">paused</span> <span class="blue"> for <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span></span></td>
-    {{ } else if (check.isUp) { }}
-  <td data-sort="{{= check.uptime }}"><span class="label label-success">&nbsp;&nbsp;&nbsp;</span> <span class="green"> for <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span></span></td>
-    {{ } else { }}
-  <td data-sort="{{= -check.downtime }}"><span class="label label-important">&nbsp;&nbsp;&nbsp;</span> <span class="red"> for <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span></span></td>
-    {{ } }}
-  {{ } else { }}
-  <td data-sort="0"><span class="label label-important">down</span> <span class="label label-warning">new</span></td>
-  {{ } }}
 </tr>
 </script>
 <script>
