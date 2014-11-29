@@ -14,7 +14,7 @@ var CheckEvent = require('./models/checkEvent');
 var Ping       = require('./models/ping');
 var PollerCollection = require('./lib/pollers/pollerCollection');
 var apiApp     = require('./app/api/app');
-var dashboardApp = require('./app/dashboard/app');
+var dashboardApp = require('./app/dashboard/status');
 
 // database
 
