@@ -56,6 +56,10 @@ app.locals({
 
 // Routes
 
+app.get('/status', function(req, res, next) {
+  res.send("OK");
+});
+
 app.get('/status/:tag', function(req, res, next) {
   Check.find({ tags: req.params.tag} ).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
     if (err) return next(err);
