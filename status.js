@@ -7,9 +7,11 @@ var url        = require('url');
 var express    = require('express');
 var config     = require('config');
 var socketIo   = require('socket.io');
+var stdio      = require('stdio');
 var fs         = require('fs');
 var monitor    = require('./lib/monitor');
 var analyzer   = require('./lib/analyzer');
+var Seed       = require('./models/seed');
 var CheckEvent = require('./models/checkEvent');
 var Ping       = require('./models/ping');
 var PollerCollection = require('./lib/pollers/pollerCollection');
@@ -141,6 +143,14 @@ module.exports = app;
 var monitorInstance;
 
 if (!module.parent) {
+  var ops = stdio.getopt({
+    'checks': {key: 'c', args: 1, description: 'Check seed file'}
+  });
+
+  if (ops.checks) {
+    Seed.checks(ops.checks, app.get('pollerCollection'));
+  }
+
   var serverUrl = url.parse(config.url);
   var port;
   if (config.server && config.server.port) {
