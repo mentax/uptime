@@ -19,7 +19,8 @@
     "net-ping":  "1.1.7",
     "js-yaml": "2.1.0",
     "webpagetest": "0.2.0",
-    "node-hipchat": "0.4.4"
+    "node-hipchat": "0.4.4",
+    "spore": "0.1.6"
   },
   "devDependencies": {
     "mocha": "1.7.x",
