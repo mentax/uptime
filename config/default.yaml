@@ -1,9 +1,9 @@
 url: 'http://localhost:80'
 
 mongodb:
-  server: REPLACE_WITH_MONGO_ENDPOINT 
-  database: REPLACE_WITH_MONGO_DATABASE 
-  user: "REPLACE_WITH_MONGO_USER" 
+  server: REPLACE_WITH_MONGO_ENDPOINT
+  database: REPLACE_WITH_MONGO_DATABASE
+  user: "REPLACE_WITH_MONGO_USER"
   password: "REPLACE_WITH_MONGO_PWD"
   connectionString:       # alternative to setting server, database, user and password separately
 
@@ -28,6 +28,7 @@ plugins:
   - ./plugins/httpsOAuthOptions
   - ./plugins/hipchat
   - ./plugins/victorops
+  - ./plugins/statushub
 
 hipchat:
   apiKey: "REPLACE_WITH_HIPCHAT_APIKEY" # HipChat Admin API Key https://www.hipchat.com/admin/api
@@ -37,6 +38,10 @@ hipchat:
 victorops:
   endpoint: "REPLACE_WITH_VICTOROPS_ENDPOINT"
 
+statushub:
+  endpoint: https://statushub.io/api/status_pages #the same for all
+  subdomains: REPLACE_WITH_STATUSHUB_SUBDOMAINS # for example ["my_stuff"] as you can have a number of different status pages
+  apiKey: REPLACE_WITH_STATUSHUB_APIKEY
 
 #- ./plugins/email
 # - ./plugins/basicAuth
@@ -45,7 +50,7 @@ victorops:
 #  method:      SMTP  # possible methods are SMTP, SES, or Sendmail
 #  transport:         # see https://github.com/andris9/nodemailer for transport options
 #    service:   Gmail # see https://github.com/andris9/Nodemailer/blob/master/lib/wellknown.js for well-known services
-#    auth:            
+#    auth:
 #      user: ""         # The email account username, e.g. 'username@gmail.com'
 #      pass: ""         # The email account password, e.G. 'password'
 #  event:
@@ -53,7 +58,7 @@ victorops:
 #    down:      true
 #    paused:    false
 #    restarted: false
-#  message:           
+#  message:
 #    from:            # The message sender, e.g. 'Fred Foo <foo@blurdybloop.com>'
 #    to: ""             # The message recipient, e.g. 'bar@blurdybloop.com, baz@blurdybloop.com'
   # The email plugin also uses the main `url` param for hyperlinks in the sent emails
@@ -66,4 +71,4 @@ victorops:
 #webPageTest:
 #  server: 'http://www.webpagetest.org'
 #  key:
-#  testOptions: 
+#  testOptions:

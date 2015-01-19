@@ -30,7 +30,8 @@ var Check = new Schema({
   uptime      : { type: Number, default: 0 },
   downtime    : { type: Number, default: 0 },
   qos         : {},
-  pollerParams : Schema.Types.Mixed
+  pollerParams : Schema.Types.Mixed,
+  statusHubId : Number
 });
 Check.plugin(require('mongoose-lifecycle'));
 
@@ -315,6 +316,7 @@ Check.methods.getSingleStatForPeriod = function(period, date, callback) {
 };
 
 Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
+  this.statusHubId = dirtyCheck.statusHubId;
   this.url = dirtyCheck.url || this.url;
   this.maxTime = dirtyCheck.maxTime || this.maxTime;
   this.isPaused = dirtyCheck.isPaused || this.isPaused;
