@@ -49,16 +49,12 @@ exports.initWebApp = function(options) {
   });
   var dashboard = options.dashboard;
 
-
+  //responsible for persistance
   dashboard.on('populateFromDirtyCheck', function(checkDocument, dirtyCheck, type) {
-    if (!dirtyCheck.statusHubId) {
-        return;
-    } else {
-      checkDocument.setPollerParam('statusHubId', dirtyCheck.statusHubId);
-      }
-
+    checkDocument.setPollerParam('statusHubId', dirtyCheck.statusHubId);
   });
 
+  //responsible to display check edit page with our view and a proper value
   dashboard.on('checkEdit', function(type, check, partial) {
     check.setPollerParam('statusHubId', check.getPollerParam('statusHubId'));
     partial.push(ejs.render(template, { locals: { check: check } }));
@@ -81,9 +77,10 @@ exports.initWebApp = function(options) {
           }
         },
       }
-      if(incidentDescriptionHandler[checkEvent.message]){
+      var statusId = check.getPollerParam('statusHubId');
+      if(incidentDescriptionHandler[checkEvent.message] && statusId){
         status.availability({
-            serviceId: check.getPollerParam('statusHubId')
+            serviceId: statusId
           }, JSON.stringify(incidentDescriptionHandler[checkEvent.message](check, checkEvent))
         , function(err, result) {
           if(result != null && result.status == "200") {
