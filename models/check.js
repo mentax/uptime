@@ -30,7 +30,7 @@ var Check = new Schema({
   uptime      : { type: Number, default: 0 },
   downtime    : { type: Number, default: 0 },
   qos         : {},
-  pollerParams : Schema.Types.Mixed
+  pollerParams : Schema.Types.Mixed,
 });
 Check.plugin(require('mongoose-lifecycle'));
 
