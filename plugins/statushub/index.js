@@ -31,7 +31,11 @@ var spore = require('spore');
 var fs         = require('fs');
 var ejs        = require('ejs');
 
+var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
+
+
 exports.initWebApp = function(options) {
+
   var config = options.config.statushub;
   var status = spore.createClient({
     "base_url" : config.endpoint,
@@ -43,6 +47,25 @@ exports.initWebApp = function(options) {
       }
     }
   });
+  var dashboard = options.dashboard;
+
+
+  dashboard.on('populateFromDirtyCheck', function(checkDocument, dirtyCheck, type) {
+    if (!dirtyCheck.statusHubId) {
+        return;
+    } else {
+      checkDocument.setPollerParam('statusHubId', dirtyCheck.statusHubId);
+      }
+
+  });
+
+  dashboard.on('checkEdit', function(type, check, partial) {
+    check.setPollerParam('statusHubId', check.getPollerParam('statusHubId'));
+    partial.push(ejs.render(template, { locals: { check: check } }));
+  });
+
+
+
 
 	CheckEvent.on('afterInsert', function (checkEvent) {
 		checkEvent.findCheck(function (err, check) {
@@ -60,10 +83,10 @@ exports.initWebApp = function(options) {
       }
       if(incidentDescriptionHandler[checkEvent.message]){
         status.availability({
-            serviceId: check.statusHubId
+            serviceId: check.getPollerParam('statusHubId')
           }, JSON.stringify(incidentDescriptionHandler[checkEvent.message](check, checkEvent))
         , function(err, result) {
-          if(result.status == "200") {
+          if(result != null && result.status == "200") {
             console.log('StatusHub: service status changed');
           } else {
             console.error('StatusHub: error changing service status. \nResponse: ' + JSON.stringify(result));
