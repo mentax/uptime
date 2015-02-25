@@ -63,20 +63,21 @@ exports.initWebApp = function(options) {
           return "component[status]="
       }
     }
+    //we should react only on up and down message, and only if check has a status id provided
+    var statusId = check.getPollerParam('statusPageId');
+    if (checkEvent.message=="up" || checkEvent.message=="down" && statusId){
       var statusChange = componentStatusHandler[checkEvent.message](check, checkEvent);
-      var statusId = check.getPollerParam('statusPageId');
-      if(componentStatusHandler[checkEvent.message] && statusId){
-        status.availability({
-            serviceId: statusId
-        }, statusChange,
-        function(err, result) {
-          if(result != null && result.status == "200") {
-            console.log('StatusPage: service status changed');
-          } else {
-            console.error('StatusPage: error changing service status. \nResponse: ' + JSON.stringify(result));
-          }
-        });
-      }
+      status.availability({
+          serviceId: statusId
+      }, statusChange,
+      function(err, result) {
+        if(result != null && result.status == "200") {
+          console.log('StatusPage: service status changed');
+        } else {
+          console.error('StatusPage: error changing service status. \nResponse: ' + JSON.stringify(result));
+        }
+      });
+    }
 		});
 	});
 
