@@ -4,7 +4,7 @@ var semver     = require('semver');
 
 // configure mongodb
 var connectWithRetry = function() {
-  mongoose.connect(config.mongodb.connectionString || 'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database, { server: { auto_reconnect : true } }, function(err) {
+  mongoose.connect(config.mongodb.connectionString || 'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database, { server: { auto_reconnect : true, poolSize: 100  } }, function(err) {
     if (err) {
       console.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
       setTimeout(connectWithRetry, 5000);
