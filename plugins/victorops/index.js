@@ -27,8 +27,14 @@ var CheckEvent = require('../../models/checkEvent');
 var spore = require('spore');
 var fs         = require('fs');
 var ejs        = require('ejs');
+var async      = require('async');
+var retry      = require('../helpers/retryProcedure');
+
 
 exports.initWebApp = function(options) {
+
+  console.log('Enabled VictorOps notifications');
+
   var config = options.config.victorops;
   var incident = spore.createClient({
     "base_url" : config.endpoint,
@@ -53,7 +59,7 @@ exports.initWebApp = function(options) {
             entity_id:check.name,
             url:check.url,
             cause: checkEvent.details
-          }
+          };
         },
         up: function(check, checkEvent) {
           return {
@@ -62,7 +68,7 @@ exports.initWebApp = function(options) {
             state_message:check.name + " came up again",
             url:check.url,
             entity_id:check.name
-          }
+          };
         },
         paused: function(check, checkEvent) {
           return {
@@ -71,7 +77,7 @@ exports.initWebApp = function(options) {
             state_message:check.name + " was paused",
             url:check.url,
             entity_id:check.name
-          }
+          };
         },
         restarted: function(check, checkEvent) {
           return {
@@ -80,24 +86,43 @@ exports.initWebApp = function(options) {
             state_message:check.name + " was restarted",
             url:check.url,
             entity_id:check.name
-          }
+          };
         }
-      }
+      };
 
-      if(incidentDescriptionHandler[checkEvent.message]) {
-        incident.create({
-            routeKey: "none"
-          }, JSON.stringify(incidentDescriptionHandler[checkEvent.message](check, checkEvent)) 
-        , function(err, client) {
-          if(err) {
-            console.error('VictorOps: error creating incident: ' + err);
-          } else {
-            console.log('VictorOps: incident created');
-          }
+      //declaring victorops call payload
+      var incidentStatus = incidentDescriptionHandler[checkEvent.message](check, checkEvent);
+      if (incidentStatus) {
+
+        retry(function(cb){
+
+          notifyVictorOps(incidentStatus, cb);
+
         });
-      }
-		});
+      };
+
+    });
 	});
 
-	console.log('Enabled VictorOps notifications');
+  //Call to victor ops with status change. Accepts a callback that receives a boolean information if the call was successful or not.
+  function notifyVictorOps(incidentStatus, cb) {
+
+    incident.create({
+        routeKey: "none"
+      },
+      JSON.stringify(incidentStatus),
+      function(err, result) {
+
+        if(result && result.status === 200) {
+
+          console.log('VictorOps: incident created');
+          cb(true);
+        }
+        else {
+
+          console.error('VictorOps: error creating incident: ' + JSON.stringify(result));
+          cb(false);
+        }
+      });
+  }
 };
