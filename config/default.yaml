@@ -42,7 +42,7 @@ email:
   message:
     from:            # The message sender, e.g. 'Fred Foo <foo@blurdybloop.com>'
     to:              # The message recipient, e.g. 'bar@blurdybloop.com, baz@blurdybloop.com'
-  dashboardUrl: 'http://localhost:8082'
+  custom_url: 'http://localhost:8082'   # This will show in the e-mail as the url of the machine
 
 basicAuth:
   username:    admin

@@ -5,8 +5,7 @@ and after <%= moment.duration(checkEvent.downtime).humanize() %> of downtime,
 <% } else { -%>
 [Up] Check "<%= check.name %>" is now up
 On <%= moment(checkEvent.timestamp).format('LLLL') %>,
-<% }%>
-a test on URL "<%= check.url %>" responded correctly.
+<% }%> <%= check.name %> went up.
 
 <% include details %>
 <% include footer %>
