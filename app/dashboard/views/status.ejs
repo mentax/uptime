@@ -1,0 +1,73 @@
+<script src="<%= route %>/javascripts/jquery.tablesorter.min.js"></script>
+<script src="<%= route %>/javascripts/uptimeBar.js"></script>
+<script src="<%= route %>/javascripts/ejs.min.js"></script>
+<h1>Status <small class="pull-right">last 24 hours</small></h1>
+<% if (info.length) { %>
+<div class="alert alert-success"><%= info %></div>
+<% } %>
+<table class="table" id="checks">
+  <tbody></tbody>
+</table>
+<script id="check_template" type="text/template">
+<tr>
+  <td data-sort="{{= check.name }}">
+    {{ if (check.isPaused) { }}
+  <span class="label label-info">&nbsp;&nbsp;&nbsp;</span>
+    {{ } else if (check.isUp) { }}
+  <span class="label label-success">&nbsp;&nbsp;&nbsp;</span>
+    {{ } else { }}
+  <span class="label label-important">&nbsp;&nbsp;&nbsp;</span>
+    {{ } }} {{= check.name }}
+    <a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
+  </td>
+</tr>
+</script>
+<script>
+jQuery(document).ready(function($) {
+  // highlight current section in main nav
+  $('.navbar-inner li').eq(1).addClass('active');
+
+  // make the chesk table sortable
+  $('#checks').tablesorter({
+    textExtraction: function(node) {
+      return $(node).data('sort');
+    },
+    sortList: [[0]]
+  });
+
+  // Fill in the table
+  var check_template = document.getElementById('check_template').innerHTML;
+  var ejs = require('ejs');
+  ejs.open = '{{';
+  ejs.close = '}}';
+  var updateChecks = function(checks, tag) {
+    var updateChecksSection = function(checks) {
+      var lines = [];
+      var lastTest = 0;
+      $.each(checks, function(key, check) {
+        if (new Date(check.lastTested) > lastTest) {
+          lastTest = new Date(check.lastTested);
+        }
+        lines.push(ejs.render(check_template, { check: check, route: '<%= route %>' }));
+      });
+      $('#checks tbody').html(lines.join(''));
+      $('#checks').trigger('update');
+    }
+
+    if (checks) {
+      updateChecksSection(checks);
+    } else {
+      $.getJSON('/api/checks?tag=<%- tag %>', updateChecksSection);
+    }
+  }
+  updateChecks(<%- JSON.stringify(checks) %>);
+  socket.on('CheckEvent', function(data) { updateChecks() });
+  window.setInterval(updateChecks, 5 * 60 * 1000); // refresh every 5 minutes to update the qos scores
+
+  // hide alert after 5s
+  window.setTimeout(function() {
+    $('h1 + div.alert').slideUp();
+  }, 5000);
+
+});
+</script>

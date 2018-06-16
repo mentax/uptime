@@ -6,6 +6,7 @@ var Check         = require('../../../models/check');
 var Tag           = require('../../../models/tag');
 var TagHourlyStat = require('../../../models/tagHourlyStat');
 var CheckEvent    = require('../../../models/checkEvent');
+var Check         = require('../../../models/check');
 var async         = require('async');
 
 /**
@@ -35,6 +36,13 @@ module.exports = function(app) {
   
   app.get('/tags/:name', loadTag, function(req, res, next) {
     res.json(req.tag);
+  });
+
+  app.get('/tags/:name/checks', function(req, res, next) {
+    Check.find({ tags: req.params.name} ).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+      if (err) return next(err);
+      res.json(checks);
+    });
   });
 
   app.get('/tags/:name/checks/:period/:timestamp', loadTag, function(req, res, next) {
