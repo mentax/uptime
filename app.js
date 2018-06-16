@@ -16,7 +16,12 @@ var PollerCollection = require('./lib/pollers/pollerCollection');
 var apiApp     = require('./app/api/app');
 var dashboardApp = require('./app/dashboard/app');
 
-// database
+// configure mongodb
+mongoose.connect(config.mongodb.connectionString || 'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database);
+mongoose.connection.on('error', function (err) {
+  console.error('MongoDB error: ' + err.message);
+  console.error('Make sure a mongoDB server is running and accessible by this application')
+});
 
 var mongoose   = require('./bootstrap');
 
@@ -95,6 +100,8 @@ var io = socketIo.listen(server);
 io.configure('production', function() {
   io.enable('browser client etag');
   io.set('log level', 1);
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
 });
 
 io.configure('development', function() {
