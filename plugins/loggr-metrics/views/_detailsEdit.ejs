@@ -1,0 +1,26 @@
+<fieldset>
+  <div class="control-group">
+  	<label class="control-label"></label>
+  	<div class="controls">
+  		<h4>Loggr Metric Settings</h4>
+  	</div>
+  	<label class="control-label">Enabled</label>
+    <div class="controls">
+    	<input type="checkbox" name="check[enabled]" <%= check.getPollerParam('enabled') ? 'checked' : '' %> />
+    </div>
+    <br/>
+    <label class="control-label">Value Kind</label>
+    <div class="controls">
+    	<select name="check[kind]">
+    		<option value="number" <%= check.getPollerParam('kind') == 'number' ? 'selected' : '' %>>Numeric</option>
+    		<option value="text" <%= check.getPollerParam('kind') == 'text' ? 'selected' : '' %>>Text</option>
+    		<option value="rtime" <%= check.getPollerParam('kind') == 'rtime' ? 'selected' : '' %>>Response Time</option>
+    	</select>
+    </div>
+    <br/>
+    <label class="control-label">Value extraction</label>
+    <div class="controls">
+      <input type="text" name="check[match]" value="<%= check.getPollerParam('match') || '' %>" class="span8" placeholder="Uses regular expressions. Leave blank to use entire response."/>
+    </div>
+  </div>
+</fieldset>
