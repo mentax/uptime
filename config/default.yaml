@@ -1,11 +1,11 @@
 url: 'http://localhost:80'
 
 mongodb:
-  server: REPLACE_WITH_MONGO_ENDPOINT
-  database: REPLACE_WITH_MONGO_DATABASE
-  user: "REPLACE_WITH_MONGO_USER"
-  password: "REPLACE_WITH_MONGO_PWD"
-  connectionString:       # alternative to setting server, database, user and password separately
+  server:   localhost
+  database: uptime
+  user:     root
+  password:
+  connectionString: mongodb://localhost/uptime      # alternative to setting server, database, user and password separately
 
 monitor:
   name:                   origin
