@@ -2,27 +2,28 @@
  * Module dependencies.
  */
 var express    = require('express');
+var errorHandler = require('express-error-handler');
 var Check      = require('../../models/check');
 var CheckEvent = require('../../models/checkEvent');
 
 var app = module.exports = express();
 
 var debugErrorHandler = function() {
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
 }
 
 // middleware
-app.configure(function(){
-  app.use(app.router);
-});
+if (app.get('env') === 'development') {
+  app.use(debugErrorHandler);
+}
 
-app.configure('development', debugErrorHandler);
+if (app.get('env') === 'test') {
+  app.use(debugErrorHandler);
+}
 
-app.configure('test', debugErrorHandler);
-
-app.configure('production', function(){
-  app.use(express.errorHandler());
-});
+if (app.get('env') === 'production') {
+  app.use(errorHandler());
+}
 
 
 // up count

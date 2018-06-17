@@ -5,6 +5,11 @@
 var http       = require('http');
 var url        = require('url');
 var express    = require('express');
+var errorHandler = require('express-error-handler');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var methodOverride = require('method-override');
+var cookieSession = require('cookie-session');
 var config     = require('config');
 var socketIo   = require('socket.io');
 var stdio      = require('stdio');
@@ -30,21 +35,18 @@ a.start();
 var app = module.exports = express();
 var server = http.createServer(app);
 
-app.configure(function(){
-  app.use(app.router);
-  // the following middlewares are only necessary for the mounted 'dashboard' app, 
-  // but express needs it on the parent app (?) and it therefore pollutes the api
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
-  app.use(express.cookieSession({
-    key:    'uptime',
-    secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
-    proxy:  true,
-    cookie: { maxAge: 60 * 60 * 1000 }
-  }));
-  app.set('pollerCollection', new PollerCollection());
-});
+// the following middlewares are only necessary for the mounted 'dashboard' app, 
+// but express needs it on the parent app (?) and it therefore pollutes the api
+app.use(bodyParser());
+app.use(methodOverride());
+app.use(cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
+app.use(cookieSession({
+  key:    'uptime',
+  secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
+  proxy:  true,
+  cookie: { maxAge: 60 * 60 * 1000 }
+}));
+app.set('pollerCollection', new PollerCollection());
 
 // load plugins (may add their own routes and middlewares)
 config.plugins.forEach(function(pluginName) {
@@ -63,17 +65,17 @@ config.plugins.forEach(function(pluginName) {
 
 app.emit('beforeFirstRoute', app, apiApp);
 
-app.configure('development', function() {
+if (app.get('env') === 'development') {
   if (config.verbose) mongoose.set('debug', true);
   app.use(express.static(__dirname + '/public'));
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-});
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+}
 
-app.configure('production', function() {
+if (app.get('env') === 'production') {
   var oneYear = 31557600000;
   app.use(express.static(__dirname + '/public', { maxAge: oneYear }));
-  app.use(express.errorHandler());
-});
+  app.use(errorHandler());
+}
 
 // Routes
 app.emit('beforeApiRoutes', app, apiApp);
@@ -94,14 +96,14 @@ app.emit('afterLastRoute', app);
 // Sockets
 var io = socketIo.listen(server);
 
-io.configure('production', function() {
+if (app.get('env') === 'production') {
   io.enable('browser client etag');
   io.set('log level', 1);
-});
+}
 
-io.configure('development', function() {
+if (app.get('env') === 'development') {
   if (!config.verbose) io.set('log level', 1);
-});
+}
 
 CheckEvent.on('afterInsert', function(event) {
   io.sockets.emit('CheckEvent', event.toJSON());
@@ -159,7 +161,7 @@ if (!module.parent) {
   } else {
     port = serverUrl.port;
     if (port === null) {
-      port = 80;
+      port = 1337;
     }
   }
   var port = process.env.PORT || port;
