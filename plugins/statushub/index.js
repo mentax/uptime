@@ -57,7 +57,7 @@ exports.initWebApp = function(options) {
   //responsible to display check edit page with our view and a proper value
   dashboard.on('checkEdit', function(type, check, partial) {
     check.setPollerParam('statusHubId', check.getPollerParam('statusHubId'));
-    partial.push(ejs.render(template, { locals: { check: check } }));
+    partial.push(ejs.render(template, { check }));
   });
 
 

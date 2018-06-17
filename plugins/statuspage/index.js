@@ -24,15 +24,16 @@ var fs         = require('fs');
 var ejs        = require('ejs');
 var async      = require('async');
 var retry      = require('../helpers/retryProcedure');
+var config = require('config').statuspage;
 
 var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 
 
 exports.initWebApp = function(options) {
+  if (typeof config === 'undefined') {
+		return false;
+	}
 
-  console.log('Enabled StatusPage notifications');
-
-  var config = options.config.statuspage;
   var status = spore.createClient({
     'base_url' : config.endpoint,
     'methods' : {
@@ -54,7 +55,9 @@ exports.initWebApp = function(options) {
   //responsible to display check edit page with our view and a proper value
   dashboard.on('checkEdit', function(type, check, partial) {
     check.setPollerParam('statusPageId', check.getPollerParam('statusPageId'));
-    partial.push(ejs.render(template, { locals: { check: check } }));
+    partial.push(ejs.render(template, {
+      check
+    }));
   });
 
   CheckEvent.on('afterInsert', function (checkEvent) {
@@ -112,4 +115,5 @@ exports.initWebApp = function(options) {
     );
   }
 
+  console.log('Enabled StatusPage notifications');
 };

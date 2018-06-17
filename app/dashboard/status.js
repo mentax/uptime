@@ -2,6 +2,7 @@
  * Module dependencies.
  */
 var express = require('express');
+var errorHandler = require('express-error-handler');
 var async = require('async');
 var partials = require('express-partials');
 var flash = require('connect-flash');
@@ -17,42 +18,36 @@ var moduleInfo = require('../../package.json');
 var app = module.exports = express();
 
 // middleware
-
-app.configure(function(){
-  app.use(partials());
-  app.use(flash());
-  app.use(function locals(req, res, next) {
-    res.locals.route = app.route;
-    res.locals.addedCss = [];
-    res.locals.renderCssTags = function (all) {
-      if (all != undefined) {
-        return all.map(function(css) {
-          return '<link rel="stylesheet" href="' + app.route + '/stylesheets/' + css + '">';
-        }).join('\n ');
-      } else {
-        return '';
-      }
-    };
-    res.locals.moment = moment;
-    next();
-  });
-  app.use(app.router);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'ejs');
-  app.use(express.static(__dirname + '/public'));
+app.use(partials());
+app.use(flash());
+app.use(function locals(req, res, next) {
+  res.locals.route = req.baseUrl;
+  res.locals.addedCss = [];
+  res.locals.renderCssTags = function (all) {
+    if (all != undefined) {
+      return all.map(function(css) {
+        return '<link rel="stylesheet" href="' + req.baseUrl + '/stylesheets/' + css + '">';
+      }).join('\n ');
+    } else {
+      return '';
+    }
+  };
+  res.locals.moment = moment;
+  next();
 });
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/public'));
 
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-});
+if (app.get('env') === 'development') {
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+}
 
-app.configure('production', function(){
-  app.use(express.errorHandler());
-});
+if (app.get('env') === 'production') {
+  app.use(errorHandler());
+}
 
-app.locals({
-  version: moduleInfo.version
-});
+app.locals.version = moduleInfo.version
 
 // Routes
 
@@ -68,6 +63,6 @@ app.get('/status/:tag', function(req, res, next) {
 });
 
 if (!module.parent) {
-  app.listen(3000);
-  console.log('Express started on port 3000');
+  app.listen(3002);
+  console.log('Express started on port 3002');
 }

@@ -31,7 +31,9 @@ var hipchat = require("node-hipchat");
 var config = require('config').hipchat;
 
 exports.initWebApp = function () {
-
+	if (typeof config === 'undefined') {
+		return false;
+	}
 	var HC = new hipchat(config.apiKey);
 
 	function message(roomId, name, event) {

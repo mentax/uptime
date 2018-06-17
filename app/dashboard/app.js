@@ -2,6 +2,8 @@
  * Module dependencies.
  */
 var express = require('express');
+var errorHandler = require('express-error-handler');
+var methodOverride = require('method-override');
 var async = require('async');
 var partials = require('express-partials');
 var flash = require('connect-flash');
@@ -18,41 +20,44 @@ var app = module.exports = express();
 
 // middleware
 
-app.configure(function(){
-  app.use(partials());
-  app.use(flash());
-  app.use(function locals(req, res, next) {
-    res.locals.route = app.route;
-    res.locals.addedCss = [];
-    res.locals.renderCssTags = function (all) {
-      if (all != undefined) {
-        return all.map(function(css) {
-          return '<link rel="stylesheet" href="' + app.route + '/stylesheets/' + css + '">';
-        }).join('\n ');
-      } else {
-        return '';
-      }
-    };
-    res.locals.moment = moment;
-    next();
-  });
-  app.use(app.router);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'ejs');
-  app.use(express.static(__dirname + '/public'));
+app.use(partials());
+app.use(flash());
+app.use(methodOverride(function (req, res) {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    var method = req.body._method
+    delete req.body._method
+    return method
+  }
+}))
+app.use(function locals(req, res, next) {
+  res.locals.route = req.baseUrl;
+  res.locals.addedCss = [];
+  res.locals.renderCssTags = function (all) {
+    if (all != undefined) {
+      return all.map(function(css) {
+        return '<link rel="stylesheet" href="' + req.baseUrl + '/stylesheets/' + css + '">';
+      }).join('\n ');
+    } else {
+      return '';
+    }
+  };
+  res.locals.moment = moment;
+  next();
 });
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/public'));
 
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-});
+if (app.get('env') === 'development') {
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+}
 
-app.configure('production', function(){
-  app.use(express.errorHandler());
-});
+if (app.get('env') === 'production') {
+  app.use(errorHandler());
+}
 
-app.locals({
-  version: moduleInfo.version
-});
+app.locals.version = moduleInfo.version
 
 // Routes
 
@@ -90,7 +95,7 @@ app.post('/checks', function(req, res, next) {
   check.save(function(err) {
     if (err) return next(err);
     req.flash('info', 'New check has been created');
-    res.redirect(app.route + (req.body.saveandadd ? '/checks/new' : ('/checks/' + check._id + '?type=hour&date=' + Date.now())));
+    res.redirect(req.baseUrl + (req.body.saveandadd ? '/checks/new' : ('/checks/' + check._id + '?type=hour&date=' + Date.now())));
   });
 });
 
@@ -108,7 +113,13 @@ app.get('/checks/:id/edit', function(req, res, next) {
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     var pollerDetails = [];
     app.emit('checkEdit', check.type, check, pollerDetails);
-    res.render('check_edit', { check: check, pollerCollection: app.get('pollerCollection'), pollerDetails: pollerDetails.join(''), info: req.flash('info'), req: req });
+    res.render('check_edit', {
+      check,
+      pollerCollection: app.get('pollerCollection'),
+      pollerDetails: pollerDetails.join(''),
+      info: req.flash('info'),
+      req: req 
+    });
   });
 });
 
@@ -137,7 +148,7 @@ app.put('/checks/:id', function(req, res, next) {
     check.save(function(err2) {
       if (err2) return next(err2);
       req.flash('info', 'Changes have been saved');
-      res.redirect(app.route + '/checks/' + req.params.id);
+      res.redirect(req.baseUrl + '/checks/' + req.params.id);
     });
   });
 });
@@ -149,7 +160,7 @@ app.delete('/checks/:id', function(req, res, next) {
     check.remove(function(err2) {
       if (err2) return next(err2);
       req.flash('info', 'Check has been deleted');
-      res.redirect(app.route + '/checks');
+      res.redirect(req.baseUrl + '/checks');
     });
   });
 });
@@ -184,7 +195,7 @@ app.delete('/tags/:name', function(req, res, next) {
       tag.remove(function(err3) {
         if (err3) return next(err3);
         req.flash('info', 'Tag has been deleted');
-        res.redirect(app.route + '/tags');
+        res.redirect(req.baseUrl + '/tags');
       });
     })
   });
