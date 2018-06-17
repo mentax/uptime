@@ -29,13 +29,16 @@ var fs         = require('fs');
 var ejs        = require('ejs');
 var async      = require('async');
 var retry      = require('../helpers/retryProcedure');
+var config = require('config').victorops;
 
 
 exports.initWebApp = function(options) {
+  if (typeof config === 'undefined') {
+		return false;
+	}
 
   console.log('Enabled VictorOps notifications');
 
-  var config = options.config.victorops;
   var incident = spore.createClient({
     "base_url" : config.endpoint,
     "version" : "1.0",
@@ -107,19 +110,17 @@ exports.initWebApp = function(options) {
   //Call to victor ops with status change. Accepts a callback that receives a boolean information if the call was successful or not.
   function notifyVictorOps(incidentStatus, cb) {
 
-    incident.create({
+    incident.create(
+      {
         routeKey: "none"
       },
       JSON.stringify(incidentStatus),
       function(err, result) {
-
         if(result && result.status === 200) {
 
           console.log('VictorOps: incident created');
           cb(true);
-        }
-        else {
-
+        } else {
           console.error('VictorOps: error creating incident: ' + JSON.stringify(result));
           cb(false);
         }

@@ -24,15 +24,16 @@ var fs         = require('fs');
 var ejs        = require('ejs');
 var async      = require('async');
 var retry      = require('../helpers/retryProcedure');
+var config = require('config').statuspage;
 
 var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 
 
 exports.initWebApp = function(options) {
+  if (typeof config === 'undefined') {
+		return false;
+	}
 
-  console.log('Enabled StatusPage notifications');
-
-  var config = options.config.statuspage;
   var status = spore.createClient({
     'base_url' : config.endpoint,
     'methods' : {
@@ -114,4 +115,5 @@ exports.initWebApp = function(options) {
     );
   }
 
+  console.log('Enabled StatusPage notifications');
 };

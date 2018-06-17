@@ -165,14 +165,22 @@ Tag.methods.getChecksForPeriod = function(period, date, callback) {
 
 Tag.statics.ensureTagsHaveFirstTestedDate = function(callback) {
   this.find({ firstTested: { $exists: false }}, function(err, tags) {
-    if (err || !tags) return callback(err);
-    async.forEach(tags, function(tag, next) {
-      tag.getFirstTested(function(err2, firstTested) {
-        if (err2 || firstTested == Infinity) return callback(err2);
-        tag.firstTested = firstTested;
-        tag.save(next);
-      });
-    }, callback);
+    if (err || !tags) {
+      return callback(err)
+    }
+    if (tags.length > 0) {
+      async.forEach(tags, function(tag, next) {
+        tag.getFirstTested(function(err2, firstTested) {
+          if (err2 || firstTested == Infinity){
+            return callback(err2);
+          }
+          tag.firstTested = firstTested;
+          tag.save(next);
+        });
+      }, callback);
+    } else {
+      return tags
+    }
   });
 };
 

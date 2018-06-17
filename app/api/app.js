@@ -8,17 +8,9 @@ var CheckEvent = require('../../models/checkEvent');
 
 var app = module.exports = express();
 
-var debugErrorHandler = function() {
-  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
-}
-
 // middleware
-if (app.get('env') === 'development') {
-  app.use(debugErrorHandler);
-}
-
-if (app.get('env') === 'test') {
-  app.use(debugErrorHandler);
+if (app.get('env') === 'development' || app.get('env') === 'test') {
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
 }
 
 if (app.get('env') === 'production') {
@@ -55,7 +47,7 @@ Check.on('afterRemove', function() { upCount = undefined; });
 CheckEvent.on('afterInsert', function() { upCount = undefined; });
 
 app.get('/checks/count', function(req, res, next) {
-  if (upCount) {
+  if (typeof upCount !== 'undefined') {
     res.json(upCount);
   } else {
     refreshUpCount(function(err) {
@@ -82,7 +74,11 @@ app.get('/', function(req, res) {
   res.json(routes);
 });
 
+app.get('/status', function(req, res, next) {
+  res.send("OK");
+});
+
 if (!module.parent) {
-  app.listen(3000);
-  console.log('Express started on port 3000');
+  app.listen(3001);
+  console.log('Express started on port 3001');
 }

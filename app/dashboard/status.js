@@ -63,6 +63,6 @@ app.get('/status/:tag', function(req, res, next) {
 });
 
 if (!module.parent) {
-  app.listen(3000);
-  console.log('Express started on port 3000');
+  app.listen(3002);
+  console.log('Express started on port 3002');
 }

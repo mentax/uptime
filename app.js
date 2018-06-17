@@ -40,8 +40,18 @@ var server = http.createServer(app);
 
 // the following middlewares are only necessary for the mounted 'dashboard' app, 
 // but express needs it on the parent app (?) and it therefore pollutes the api
-app.use(bodyParser());
-app.use(methodOverride());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
+app.use(methodOverride(function (req, res) {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    var method = req.body._method
+    delete req.body._method
+    return method
+  }
+}))
 app.use(cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
 app.use(cookieSession({
   key:    'uptime',
@@ -101,13 +111,13 @@ var io = socketIo.listen(server);
 
 if (app.get('env') === 'production') {
   io.enable('browser client etag');
-  io.set('log level', 1);
+  //io.set('log level', 1);
   io.set("transports", ["xhr-polling"]);
   io.set("polling duration", 10);
 }
 
 if (app.get('env') === 'development') {
-  if (!config.verbose) io.set('log level', 1);
+  // if (!config.verbose) io.set('log level', 1);
 }
 
 CheckEvent.on('afterInsert', function(event) {
@@ -116,14 +126,12 @@ CheckEvent.on('afterInsert', function(event) {
 
 io.sockets.on('connection', function(socket) {
   socket.on('set check', function(check) {
-    socket.set('check', check);
+    if (typeof check === 'function') {
+      check();
+    }
   });
   Ping.on('afterInsert', function(ping) {
-    socket.get('check', function(err, check) {
-      if (ping.check == check) {
-        socket.emit('ping', ping);
-      }
-    });
+    socket.emit('ping', ping);
   });
 });
 

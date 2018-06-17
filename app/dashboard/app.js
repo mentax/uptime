@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var errorHandler = require('express-error-handler');
+var methodOverride = require('method-override');
 var async = require('async');
 var partials = require('express-partials');
 var flash = require('connect-flash');
@@ -21,6 +22,14 @@ var app = module.exports = express();
 
 app.use(partials());
 app.use(flash());
+app.use(methodOverride(function (req, res) {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    var method = req.body._method
+    delete req.body._method
+    return method
+  }
+}))
 app.use(function locals(req, res, next) {
   res.locals.route = req.baseUrl;
   res.locals.addedCss = [];
@@ -78,7 +87,6 @@ app.post('/checks', function(req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
-    console.log(dirtyCheck)
     check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'))
     app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
   } catch (err) {
