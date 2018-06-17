@@ -78,6 +78,7 @@ app.post('/checks', function(req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
+    console.log(dirtyCheck)
     check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'))
     app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
   } catch (err) {
