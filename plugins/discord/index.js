@@ -1,6 +1,9 @@
 /**
  * Discord plugin
  * Notifies all events (up, down, paused, restarted) by discord
+ * 
+ * Plugin Author: boobo94
+ * Forked from: https://github.com/boobo94/uptime
  *
  * Installation
  * ------------
