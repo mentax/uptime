@@ -24,10 +24,15 @@ var dashboardApp = require('./app/dashboard/app');
 var mongoose   = require('./bootstrap');
 
 // configure mongodb
-mongoose.connect(config.mongodb.connectionString || 'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database);
-mongoose.connection.on('error', function (err) {
-  console.error('MongoDB error: ' + err.message);
-  console.error('Make sure a mongoDB server is running and accessible by this application')
+mongoose.connect(
+  config.mongodb.connectionString
+  ||
+  'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database
+).catch(function (error) {
+  if (config.debug) {
+    console.error('MongoDB error: ' + err.message);
+  }
+  console.error('\x1b[31m%s\x1b[0m', 'Make sure a mongoDB server is running and accessible by this application')
 });
 
 var a = analyzer.createAnalyzer(config.analyzer);

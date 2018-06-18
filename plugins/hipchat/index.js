@@ -32,6 +32,7 @@ var config = require('config').hipchat;
 
 exports.initWebApp = function () {
 	if (typeof config === 'undefined') {
+		console.log('\x1b[33m%s\x1b[0m', 'Hipchat configuration missing, plugin not initialized.');
 		return false;
 	}
 	var HC = new hipchat(config.apiKey);
