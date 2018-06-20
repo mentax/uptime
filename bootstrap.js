@@ -42,7 +42,7 @@ var connectWithRetry = function() {
   ).catch(function (error) {
     console.error('\x1b[31m%s\x1b[0m', 'Failed to connect to mongo on startup - retrying in 5 sec');
     if (config.debug) {
-      console.log(err)
+      console.log(error)
     }
     setTimeout(connectWithRetry, 5000);
   });
