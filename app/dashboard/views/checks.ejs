@@ -23,8 +23,15 @@
 <script id="check_template" type="text/template">
 <tr>
   <td data-sort="{{= check.name }}">
+    {{ if (check.type === "https") { }}
+      <i class="fas fa-lock {{= check.validSSL ? 'text-success' : 'text-danger' }}"></i>
+    {{ } }}
     <a href="{{=  route + '/checks/' + check._id }}">{{= check.name }}</a>
     <a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
+    {{ if (typeof check.errorMessage !== 'undefined') { }}
+      <br />
+      {{= check.errorMessage }}
+    {{ } }}
   </td>
   <td>
     {{= check.tags.join(", ") }}

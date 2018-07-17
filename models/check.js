@@ -15,24 +15,28 @@ var Tag              = require('../models/tag');
 
 // main model
 var Check = new Schema({
-  name        : String,
-  type        : String,
-  url         : String,
-  interval    : { type: Number, default: 60000, min: 60000 }, // interval between two pings
-  maxTime     : { type: Number, default: 1500 },   // time under which a ping is considered responsive
+  name          : String,
+  type          : String,
+  url           : String,
+  statusCode    : String, 
+  validSSL      : { type: Boolean, default: true },
+  interval      : { type: Number, default: 60000, min: 60000 }, // interval between two pings
+  maxTime       : { type: Number, default: 1500 },   // time under which a ping is considered responsive
   alertTreshold : { type: Number, default: 1 },    // nb of errors from which to trigger a new CheckEvent
-  errorCount  : { type: Number, default: 0 },      // count number of errors
-  alertState  : { type: Boolean, default: false }, // state is true when errorCount greater than alertTreshold and already triggered notification 
-  tags        : [String],
-  lastChanged : Date,
-  firstTested : Date,
-  lastTested  : Date,
-  isUp        : Boolean,
-  isPaused    : { type: Boolean, default: false },
-  uptime      : { type: Number, default: 0 },
-  downtime    : { type: Number, default: 0 },
-  qos         : {},
-  pollerParams : Schema.Types.Mixed,
+  errorCount    : { type: Number, default: 0 },      // count number of errors
+  errorCode     : String,
+  errorMessage  : String,
+  alertState    : { type: Boolean, default: false }, // state is true when errorCount greater than alertTreshold and already triggered notification 
+  tags          : [String],
+  lastChanged   : Date,
+  firstTested   : Date,
+  lastTested    : Date,
+  isUp          : Boolean,
+  isPaused      : { type: Boolean, default: false },
+  uptime        : { type: Number, default: 0 },
+  downtime      : { type: Number, default: 0 },
+  qos           : {},
+  pollerParams  : Schema.Types.Mixed,
 });
 Check.plugin(require('mongoose-lifecycle'));
 
@@ -87,8 +91,8 @@ Check.methods.togglePause = function() {
   this.lastChanged = new Date();
 };
 
-Check.methods.setLastTest = function(status, time, error) {
-  var now = time ? new Date(time) : new Date();
+Check.methods.setLastTest = function({ status, statusCode, timestamp, error, errorCode }) {
+  var now = timestamp ? new Date(timestamp) : new Date();
   var mustNotifyEvent = this.mustNotifyEvent(status);
 
   if (!this.firstTested) {
@@ -103,6 +107,19 @@ Check.methods.setLastTest = function(status, time, error) {
     this.uptime = 0;
     this.downtime = 0;
   }
+  
+  this.statusCode = statusCode;
+  this.errorCode = errorCode;
+  this.errorMessage = error;
+  switch(errorCode) {
+    case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE':
+      this.errorCode = errorCode
+      this.validSSL = false;
+      break;
+    default:
+      this.validSSL = true;
+      break;
+  }
 
   if (mustNotifyEvent) {
     var event = new CheckEvent({
@@ -110,8 +127,10 @@ Check.methods.setLastTest = function(status, time, error) {
       check: this,
       tags: this.tags,
       message: status ? 'up' : 'down',
+      statusCode: '',
       details: error
     });
+
     if (status && this.lastChanged && this.isUp != undefined) {
       // Check comes back up
       event.downtime = now.getTime() - this.lastChanged.getTime();

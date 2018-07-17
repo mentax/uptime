@@ -174,8 +174,9 @@ exports.initMonitor = function(options) {
         var post_req = http.request(post_options, function(res) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
-		if (trim(chunk) != "")
-                console.log('Response: ' + chunk);
+		        if (trim(chunk) != "") {
+                    console.log('Response: ' + chunk);
+                }
             });
         });
 

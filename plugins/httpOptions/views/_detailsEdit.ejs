@@ -1,26 +1,38 @@
 <script src="/httpOptions/javascripts/jquery.autoresize.js"></script>
-<fieldset>
-  <div class="control-group">
-    <label class="control-label">HTTP Options</label>
-    <div class="controls">
-      <textarea name="check[http_options]" class="span8" rows="3" placeholder="Use YAML format, e.g method: HEAD"/><%= check.getPollerParam('http_options') || '' %></textarea>
-      <span class="help-inline">See the
-        <% if (check.type === "http") { %>
-        <a target="_blank" href="http://nodejs.org/api/http.html#http_http_request_options_callback">Node.js HTTP
-        <% } else { %>
-        <a target="_blank" href="http://nodejs.org/api/https.html#https_https_request_options_callback">Node.js HTTPS
-        <% } %>
-        documentation</a> for a list of available options</span>
-    </div>
-    <div class="control-group">
-        <label class="control-label">HTTP Body</label>
-        <div class="controls">
-            <textarea name="check[http_body]" class="span8" rows="3" placeholder="POST body go here.."/><%= check.getPollerParam('http_body') || '' %></textarea>
-            <span class="help-inline">You can provide your body in this text area.</span>
-        </div>
-    </div>
+<div class="col col-xs-12 col-md-6">
+  <div class="form-group">
+    <label for="formControlTextareaHttpOptions">HTTP Options</label>
+    <textarea
+      class="form-control"
+      id="formControlTextareaHttpOptions"
+      name="check[http_options]" rows="3"
+      placeholder="Use YAML format, e.g method: HEAD"
+    ><%= check.getPollerParam('http_options') || '' %></textarea>
+    <small class="form-text text-muted">
+      See the
+      <% if (check.type === "http") { %>
+      <a target="_blank" href="http://nodejs.org/api/http.html#http_http_request_options_callback">Node.js HTTP
+      <% } else { %>
+      <a target="_blank" href="http://nodejs.org/api/https.html#https_https_request_options_callback">Node.js HTTPS
+      <% } %>
+      documentation</a> for a list of available options
+    </small>
   </div>
-</fieldset>
+</div>
+<div class="col col-xs-12 col-md-6">
+  <div class="form-group">
+    <label for="formControlTextareaHttpBody">HTTP Body</label>
+    <textarea
+      class="form-control"
+      id="formControlTextareaHttpBody"
+      name="check[http_body]" rows="3"
+      placeholder="POST body go here.."
+    ><%= check.getPollerParam('http_body') || '' %></textarea>
+    <small class="form-text text-muted">
+      You can provide your body in this text area.
+    </small>
+  </div>
+</div>
 <script type="text/javascript">
 jQuery(function($) {
   $('#check_form textarea[name="check[http_options]"]').autoResize();
