@@ -73,7 +73,11 @@ var updateMonthlyQosSinceTheFirstPing = function(callback) {
     var oldestDate = ping.timestamp.valueOf();
     var nbDates = 0;
     async.whilst(
-      function() { date -= 28 * 24 * 60 * 60 * 1000; return date > oldestDate; },
+      function() {
+        date -= 28 * 24 * 60 * 60 * 1000;
+        console.log('async whilst date', date > oldestDate, date, oldestDate)
+        return date > oldestDate; 
+      },
       function(cb) {
         var dateObject = new Date(date);
         QosAggregator.updateMonthlyQos(dateObject, cb);
@@ -117,6 +121,7 @@ var ensureTagsHaveFirstTestedDate = function(callback) {
 };
 
 async.series([emptyStats, updateUptime, updateHourlyQosSinceTheFirstPing, updateDailyQosSinceTheFirstPing, updateMonthlyQosSinceTheFirstPing, updateYearlyQosSinceTheFirstPing, updateLastDayQos, ensureTagsHaveFirstTestedDate], function(err) {
+  console.log('trigger async')
   if (err) {
     throw err;
   } else {

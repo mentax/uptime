@@ -291,7 +291,7 @@ Check.methods.getStatsForPeriod = function(period, begin, end, callback) {
   var periodPrefs = statProvider[period];
   var stats = [];
   var query = { check: this, timestamp: { $gte: begin, $lte: end } };
-  var stream = this.db.model(periodPrefs['model']).find(query).sort({ timestamp: -1 }).stream();
+  var stream = this.db.model(periodPrefs['model']).find(query).sort({ timestamp: -1 }).cursor();
   stream.on('error', function(err) {
     callback(err);
   }).on('data', function(stat) {
@@ -310,7 +310,7 @@ Check.methods.getStatsForPeriod = function(period, begin, end, callback) {
         end: stat.end ? stat.end.valueOf() : (Date.parse(stat.timestamp) + periodPrefs['duration'])
       });
     }
-  }).on('close', function() {
+  }).on('end', function() {
     callback(null, stats);
   });
 };

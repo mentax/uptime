@@ -46,16 +46,16 @@ var createFixturePings = function(callback) {
       async.whilst(
         function() { date += check.interval; return date < now; },
         function(cb) {
-          Ping.createForCheck(
-            Math.random() < (quality / 100),
-            date,
-            check.maxTime + (Math.random() - 0.9) * 200,
+          Ping.createForCheck({
+            status: Math.random() < (quality / 100),
+            statusCode: date,
+            time: check.maxTime + (Math.random() - 0.9) * 200,
             check,
-            'populator',
-            'Dummy Error',
-            null,
-            cb
-          );
+            monitorName: 'populator',
+            error: 'Dummy Error',
+            details: null,
+            callback: cb
+          });
           nbPings++;
           if (nbPings % 288 === 0) {
             console.log(new Date(date) + ' Created pings for check "' + check.name + '"');
