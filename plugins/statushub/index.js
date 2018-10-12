@@ -33,10 +33,14 @@ var ejs        = require('ejs');
 
 var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 
+var config = require('config').statushub;
 
 exports.initWebApp = function(options) {
-
-  var config = options.config.statushub;
+  if (typeof config === 'undefined') {
+    console.log('\x1b[33m%s\x1b[0m', 'StatusHub configuration missing, plugin not initialized.');
+		return false;
+  }
+  
   var status = spore.createClient({
     "base_url" : config.endpoint,
     "methods" : {

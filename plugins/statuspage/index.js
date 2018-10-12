@@ -31,6 +31,7 @@ var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 
 exports.initWebApp = function(options) {
   if (typeof config === 'undefined') {
+    console.log('\x1b[33m%s\x1b[0m', 'StatusPage configuration missing, plugin not initialized.');
 		return false;
 	}
 

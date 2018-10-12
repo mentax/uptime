@@ -23,22 +23,50 @@
 <script id="check_template" type="text/template">
 <tr>
   <td data-sort="{{= check.name }}">
+    {{ if (check.type === "https") { }}
+      <i class="fas fa-lock {{= check.validSSL ? 'text-success' : 'text-danger' }}"></i>
+    {{ } }}
     <a href="{{=  route + '/checks/' + check._id }}">{{= check.name }}</a>
     <a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
+    {{ if (typeof check.errorMessage !== 'undefined') { }}
+      <br />
+      {{= check.errorMessage }}
+    {{ } }}
   </td>
   <td>
     {{= check.tags.join(", ") }}
   </td>
   {{ if (check.lastTested) { }}
     {{ if (check.isPaused) { }}
-  <td data-sort="{{= check.isUp ? check.uptime : -check.downtime }}"><span class="label label-info">paused</span> <span class="blue"> for <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span></span></td>
+  <td data-sort="{{= check.isUp ? check.uptime : -check.downtime }}">
+    <span class="badge badge-info">paused</span>
+    <span class="blue">
+      for
+      <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span>
+    </span>
+  </td>
     {{ } else if (check.isUp) { }}
-  <td data-sort="{{= check.uptime }}"><span class="label label-success">Up</span> <span class="green"> for <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span></span></td>
+  <td data-sort="{{= check.uptime }}">
+      <span class="badge badge-success">Up</span>
+    <span class="green">
+      for
+      <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span>
+    </span>
+  </td>
     {{ } else { }}
-  <td data-sort="{{= -check.downtime }}"><span class="label label-important">Down</span> <span class="red"> for <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span></span></td>
+  <td data-sort="{{= -check.downtime }}">
+    <span class="badge badge-danger">Down</span>
+    <span class="red">
+      for
+      <span title="{{= new Date(check.lastChanged) }}">{{= moment(check.lastChanged).fromNow(true) }}</span>
+    </span>
+  </td>
     {{ } }}
   {{ } else { }}
-  <td data-sort="0"><span class="label label-important">down</span> <span class="label label-warning">new</span></td>
+  <td data-sort="0">
+    <span class="badge badge-danger">down</span>
+    <span class="badge badge-warning">new</span>
+  </td>
   {{ } }}
   {{ if (check.qos) { }}
   <td data-sort="{{= check.qos.availability }}">

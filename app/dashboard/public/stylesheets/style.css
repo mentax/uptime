@@ -47,10 +47,14 @@ div.btn-toolbar {
   margin-top: 1em;
   margin-left: 0;
   list-style: none;
+  padding-left: 32px;
 }
 
 #events li {
   padding-bottom: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  box-sizing: border-box;
 }
 
 #events li.new {

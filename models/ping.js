@@ -5,6 +5,7 @@ var Ping = new Schema({
   timestamp    : { type: Date, default: Date.now },
   isUp         : Boolean,  // false if ping returned a non-OK status code or timed out
   isResponsive : Boolean,  // true if the ping time is less than the check max time 
+  validSSL     : { type: Boolean, default: true },
   time         : Number,
   check        : { type: Schema.ObjectId, ref: 'Check' },
   tags         : [String],
@@ -12,6 +13,8 @@ var Ping = new Schema({
   // for pings in error, more details need to be persisted
   downtime     : Number,   // time since last ping if the ping is down
   error        : String,
+  errorCode    : String,
+  errorMessage : String,
   details      : Schema.Types.Mixed
 });
 Ping.index({ timestamp: -1 });
@@ -27,7 +30,7 @@ Ping.methods.setDetails = function(details) {
   this.markModified('details');
 };
 
-Ping.statics.createForCheck = function(status, timestamp, time, check, monitorName, error, details, callback) {
+Ping.statics.createForCheck = function(status, statusCode, timestamp, time, check, monitorName, error, errorCode, details, callback) {
   timestamp = timestamp || new Date();
   timestamp = timestamp instanceof Date ? timestamp : new Date(parseInt(timestamp, 10));
 
@@ -39,6 +42,18 @@ Ping.statics.createForCheck = function(status, timestamp, time, check, monitorNa
   } else {
     ping.isResponsive = false;
   }
+
+  this.errorMessage = error;
+  switch(errorCode) {
+    case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE':
+      ping.errorCode = errorCode
+      ping.validSSL = false;
+      break;
+    default:
+      ping.validSSL = true;
+      break;
+  }
+
   ping.time = time;
   ping.check = check;
   ping.tags = check.tags;
@@ -52,7 +67,8 @@ Ping.statics.createForCheck = function(status, timestamp, time, check, monitorNa
   }
   ping.save(function(err1) {
     if (err1) return callback(err1);
-    check.setLastTest(status, timestamp, error);
+    //console.log('statusCode 68', statusCode)
+    check.setLastTest({ status, statusCode, timestamp, error, errorCode });
     check.save(function(err2) {
       if (err2) return callback(err2);
       callback(null, ping);

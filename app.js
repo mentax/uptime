@@ -24,10 +24,15 @@ var dashboardApp = require('./app/dashboard/app');
 var mongoose   = require('./bootstrap');
 
 // configure mongodb
-mongoose.connect(config.mongodb.connectionString || 'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database);
-mongoose.connection.on('error', function (err) {
-  console.error('MongoDB error: ' + err.message);
-  console.error('Make sure a mongoDB server is running and accessible by this application')
+mongoose.connect(
+  config.mongodb.connectionString
+  ||
+  'mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database
+).catch(function (error) {
+  if (config.debug) {
+    console.error('MongoDB error: ' + error.message);
+  }
+  console.error('\x1b[31m%s\x1b[0m', 'Make sure a mongoDB server is running and accessible by this application')
 });
 
 var a = analyzer.createAnalyzer(config.analyzer);
@@ -163,19 +168,30 @@ if (!module.parent) {
   if (config.server && config.server.port) {
     console.error('Warning: The server port setting is deprecated, please use the url setting instead');
     port = config.server.port;
-  } else {
-    port = serverUrl.port;
-    if (port === null) {
-      port = 1337;
-    }
   }
-  var port = process.env.PORT || port;
-  var host = process.env.HOST || serverUrl.hostname;
+  var port = port || serverUrl.port || process.env.PORT;
+  var host = serverUrl.hostname || process.env.HOST;
   server.listen(port, function(){
     console.log("Express server listening on host %s, port %d in %s mode", host, port, app.settings.env);
   });
-  server.on('error', function(e) {
+  server.on('error', function(error) {
     if (monitorInstance) {
+      var bind = typeof port === 'string'
+        ? 'Pipe ' + port
+        : 'Port ' + port;
+
+      switch (error.code) {
+        case 'EACCES':
+          console.error('\x1b[31m%s\x1b[0m', bind + ' requires elevated privileges');
+          process.exit(1);
+          break;
+        case 'EADDRINUSE':
+          console.error('\x1b[31m%s\x1b[0m', bind + ' is already in use');
+          process.exit(1);
+          break;
+        default:
+          throw error;
+      }
       monitorInstance.stop();
       process.exit(1);
     }

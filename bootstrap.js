@@ -11,10 +11,7 @@ var connectWithRetry = function() {
       poolSize: 100
     },
     function(err) {
-      if (err) {
-        console.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
-        setTimeout(connectWithRetry, 5000);
-      } else {
+      if (!err) {
         mongoose.connection.on('open', function (err) {
           mongoose.connection.on('error', function(err) {
             console.log("Mongo collection failed, trying to reconnect"); 
@@ -42,7 +39,13 @@ var connectWithRetry = function() {
         });
       }
     }
-  );
+  ).catch(function (error) {
+    console.error('\x1b[31m%s\x1b[0m', 'Failed to connect to mongo on startup - retrying in 5 sec');
+    if (config.debug) {
+      console.log(error)
+    }
+    setTimeout(connectWithRetry, 5000);
+  });
 };
 connectWithRetry();
 

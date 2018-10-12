@@ -1,5 +1,6 @@
-url: 'http://localhost:1337'
-port: 1337
+url: 'http://localhost:3003'
+port: 3003
+debug: false
 
 mongodb:
   server:   localhost
@@ -10,10 +11,11 @@ mongodb:
 
 monitor:
   name:                   origin
-  apiUrl:                 'http://localhost:1337/api' # must be accessible without a proxy
+  apiUrl:                 'http://localhost:3003/api' # must be accessible without a proxy
   pollingInterval:        10000      # ten seconds
   timeout:                5000       # five seconds
   userAgent:              NodeUptime/3.0 (https://github.com/fzaninotto/uptime)
+  debug:                  false
 
 analyzer:
   updateInterval:         60000      # one minute
@@ -27,10 +29,10 @@ plugins:
   - ./plugins/patternMatcher
   - ./plugins/httpOptions
   - ./plugins/httpsOAuthOptions
-  - ./plugins/hipchat
-  - ./plugins/victorops
-#  - ./plugins/statushub
-  - ./plugins/statuspage
+  #- ./plugins/hipchat
+  #- ./plugins/victorops
+  #- ./plugins/statushub
+  #- ./plugins/statuspage
 
 #hipchat:
 #  apiKey: "REPLACE_WITH_HIPCHAT_APIKEY" # HipChat Admin API Key https://www.hipchat.com/admin/api

@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <title>Uptime</title>
-    <link rel="stylesheet" href="<%= route %>/stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="<%= route %>/stylesheets/bootstrap.min.css">
     <link rel="stylesheet" href="<%= route %>/stylesheets/style.css">
     <link rel="shortcut icon" href="<%= route %>/favicon.ico">
     <link rel="apple-touch-icon" href="<%= route %>/apple-touch-icon.png">
@@ -24,33 +25,61 @@
     <![endif]-->
   </head>
   <body>
-    <div class="container">
-      <div class="navbar navbar-inverse">
-        <div class="navbar-inner">
-          <div class="container">
-            <a class="brand" href="<%= route %>/events">Uptime</a>
-            <ul class="nav pull-left">
-              <li><a href="<%= route %>/events">Events</a></li>
-              <li><a href="<%= route %>/checks">Checks</a></li>
-              <li><a href="<%= route %>/tags">Tags</a></li>
-              <li id="new_events"><a href="<%= route %>/events?highlightFrom=<%= Date.now() %>"></a></li> 
-            </ul>
-            <ul class="nav pull-right" id="check_summary">
-              <li id="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
-              <li id="all_down" style="display: none;"><span class="label label-important">Down</span><strong class="red">0</strong></li>
-            </ul>
-          </div>
+    <div class="alert alert-success" role="alert" id="alert-version" style="display:none;">
+      Check it out, version <span id="alert-version-label"></span> is now available
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand" href="<%= route %>/events">Uptime</a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="<%= route %>/events">Events</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="<%= route %>/checks">Checks</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="<%= route %>/tags">Tags</a>
+            </li>
+            <li class="nav-item" id="new_events">
+              <a class="nav-link" href="<%= route %>/events?highlightFrom=<%= Date.now() %>"></a>
+            </li>
+          </ul>
         </div>
+        <ul class="nav pull-right" id="check_summary">
+          <li id="all_up" style="display:none;">
+            <span class="label label-success">Up</span>
+            <strong class="label badge badge-success">0</strong>
+          </li>
+          <li id="all_down" style="display: none;">
+            <span class="label label-important">Down</span>
+            <strong class="label badge badge-danger">0</strong>
+          </li>
+        </ul>
       </div>
+    </nav>
+    <div class="container">
       <section>
         <%- body %>
       </section>
-      <footer class="footer">
-        <p class="pull-right"><a href="#">Back to top</a></p>
-        <p><a href="https://github.com/fzaninotto/uptime">Uptime <%= version %></a>, powered by <a href="http://nodejs.org/">Node.js</a>, <a href="http://www.mongodb.org/">MongoDB</a>, and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
-        <p>Code licensed under the <a href="https://raw.github.com/fzaninotto/uptime/master/LICENSE">MIT License</a>. Check the <a href="https://github.com/fzaninotto/uptime">Uptime GitHub repository</a> regularly for updates.
-      </footer>
     </div>
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <p><a href="https://github.com/AlexanderYW/uptime">Uptime <%= version %></a>, powered by <a href="http://nodejs.org/">Node.js</a>, <a href="http://www.mongodb.org/">MongoDB</a>, and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
+          </div>
+          <div class="col">
+            <p class="text-right"><a href="#">Back to top</a></p>
+          </div>
+          <div class="w-100"></div>
+          <div class="col">
+              <p>Code licensed under the <a href="https://raw.github.com/AlexanderYW/uptime/master/LICENSE">MIT License</a>. Check the <a href="https://github.com/fzaninotto/uptime">Uptime GitHub repository</a> regularly for updates.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script>
     var nbNewEvents = 0;
     var loadedAt = new Date();
@@ -87,6 +116,32 @@
         $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
       });
       updateCounts();
+
+      var checkForNewVersion = function() {
+        $.getJSON('https://api.github.com/repos/alexanderyw/uptime/tags', function(data) {
+          var githubVersion = data[0].name.replace('v', '')
+          if (compareVersion(githubVersion, "<%= version %>")) {
+            $('#alert-version').show();
+            $('#alert-version #alert-version-label').html(githubVersion);
+          }
+        });
+      };
+      checkForNewVersion();
+
+      function compareVersion(ver1, ver2) {
+        ver1 = ver1.split('.')
+        ver2 = ver2.split('.')
+        var i = 0, v1, v2;
+        ver1 = Array.isArray(ver1) ? ver1 : [ver1];
+        /*default is true*/
+        while (i < 4) {
+            v1 = ver1[i]; v2 = ver2[i];
+            if (!v1 || !v2) return true;
+            if (v1 * 1 < v2 * 1) return false;
+            i++;
+        }
+        return true;
+      }
     });
     </script>
   </body>

@@ -118,8 +118,9 @@ exports.initMonitor = function (options) {
 
         var plugin_config = loadPluginConfig(http_auth_url, config);
         var placeholderValues = check.placeHolderValues;
-        if (!isAccessTokenValid(check, 'expires_on'))
+        if (!isAccessTokenValid(check, 'expires_on')) {
             placeholderValues = updatePlaceHolderValues(check, http_auth_url, http_auth_body, http_auth_headers, plugin_config);
+        }
         replacePlaceholders(poller, http_options, plugin_config.placeholders, placeholderValues);
     });
 };

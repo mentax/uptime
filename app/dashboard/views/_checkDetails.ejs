@@ -4,117 +4,122 @@
     <input type="hidden" name="_method" value="<%= (check.isNew) ? 'post' : 'put' %>" />
 
     <fieldset>
-      <div class="control-group">
-        <label class="control-label">Type</label>
-        <div class="controls controls-row">
-          <select name="check[type]" value="<% check.type || '' %>" class="span2">
-            <option value="">auto</option>
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text" for="inputGroupSelectType">Type</label>
+        </div>
+        <select class="custom-select" name="check[type]" value="<% check.type || '' %>" id="inputGroupSelectType">
+          <option value="" selected>auto</option>
             <% pollerCollection.getTypes().forEach(function(poller) { %>
             <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
             <% }) %>
-          </select>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Url</label>
-        <div class="controls controls-row">
-          <textarea type="text" required name="check[url]" class="span8"  placeholder="http://www.example.com"><%= check.url || '' %></textarea>
-          <span class="help-inline" style="position:absolute"><a href="<%= check.url %>" target="_blank"><img src="<%= route %>/images/external-link-ltr-icon.png"></a></span>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Name</label>
-        <div class="controls">
-          <input type="text" name="check[name]" value="<%= check.name || '' %>" class="span8" placeholder="Type a name here"/>
-        </div>
+        </select>
       </div>
     </fieldset>
 
     <div class="row">
-
-      <div class="span6">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label">Polling interval</label>
-            <div class="controls">
-              <div class="input-prepend input-append">
-                <% if (check.lastTested) { %>
-                <a class="btn" name="pause"><i class="icon-<%= check.isPaused ? 'play' : 'pause' %>"></i></a>
-                <% } %>
-                <input type="text" name="check[interval]" value="<%= (check.interval / 1000).toFixed() %>" class="span2" />
-                <span class="add-on">s</span>
-              </div>
-            </div>
-          </div>
-        </fieldset>
+      <div class="col col-xs-12">
+        <div class="form-group">
+          <label for="formControlTextareaUrl">Url</label>
+          <span class="help-inline" style="position:absolute">
+            <a href="<%= check.url %>" target="_blank">
+              <img src="<%= route %>/images/external-link-ltr-icon.png">
+            </a>
+          </span>
+          <textarea type="text" required name="check[url]"  placeholder="http://www.example.com" class="form-control" id="formControlTextareaUrl"><%= check.url || '' %></textarea>
+        </div>
       </div>
+    </div>
 
-      <div class="span6">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label">Slow threshold</label>
-            <div class="controls">
-              <div class="input-append">
-                <input type="text" name="check[maxTime]" value="<%= check.maxTime %>" class="span1" />
-                <span class="add-on">ms</span>
-              </div>
-            </div>
-          </div>
-        </fieldset>
+    <div class="row">
+      <div class="col col-xs-12">
+        <div class="form-group">
+          <label for="formControlInputName">Name</label>
+          <input type="text" name="check[name]" value="<%= check.name || '' %>" class="form-control" id="formControlInputName" placeholder="Type a name here">
+        </div>
       </div>
-
     </div>
 
 
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Alert threshold</label>
-        <div class="controls">
-          <div class="input-append">
-            <input type="text" name="check[alertTreshold]" value="<%= check.alertTreshold %>" class="span1" />
-            <span class="add-on">failed pings</span>
+    <div class="row">
+      <div class="col col-md-6 col-xs-12">
+        <div class="form-group">
+          <label for="formControlInputInterval">Polling interval</label>
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <% if (check.lastTested) { %>
+              <button class="btn btn-secondary" name="pause">
+                <i class="fas fa-<%= check.isPaused ? 'play' : 'pause' %>"></i>
+              </button>
+              <% } %>
+            </div>
+            <input id="formControlInputInterval" type="text" name="check[interval]" value="<%= (check.interval / 1000).toFixed() %>" class="form-control" placeholder="">
+            <div class="input-group-append">
+              <span class="input-group-text">s</span>
+            </div>
           </div>
         </div>
       </div>
-    </fieldset>
+      <div class="col col-md-6 col-xs-12">
+        <div class="form-group">
+          <label for="formControlInputSlowThreshold">Slow threshold</label>
+          <div class="input-group mb-3">
+            <input id="formControlInputSlowThreshold" type="text" name="check[maxTime]" value="<%= check.maxTime %>" class="form-control" placeholder="">
+            <div class="input-group-append">
+              <span class="input-group-text">ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <span id="pollerDetails">
+
+      <div class="col col-md-6 col-xs-12">
+        <div class="form-group">
+          <label for="formControlInputAlertThreshold">Alert threshold</label>
+          <div class="input-group mb-3">
+            <input id="formControlInputAlertThreshold" type="number" name="check[alertTreshold]" min="0" value="<%= check.alertTreshold %>" class="form-control" placeholder="">
+            <div class="input-group-append">
+              <span class="input-group-text">failed pings</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" id="pollerDetails">
     <%- pollerDetails %>
-    </span>
-
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Tags</label>
-        <div class="controls">
-          <textarea name="check[tags]" rows="2"/><%= check.tags.join(', ') %></textarea>
+    </div>
+    <div class="row">
+      <div class="col col-xs-12 col-md-6">
+        <div class="form-group">
+          <label for="formControlTextareaTags">Tags</label>
+          <textarea class="form-control" id="formControlTextareaTags" name="check[tags]" rows="2"/><%= check.tags.join(', ') %></textarea>
         </div>
       </div>
       <% if (check.lastTested) { %>
-      <div class="control-group">
-        <label class="control-label">Last edited on</label>
-        <div class="controls">
-          <span class="span4 uneditable-input"><%= check.lastTested.getTime() %></span>
+      <div class="col col-xs-12 col-md-6">
+          <div class="form-group">
+          <label>Last edited on</label>
+          <div class="input-group mb-3">
+            <input disabled name="check[alertTreshold]" min="0" value="<%= check.lastTested.getTime() %>" class="form-control uneditable-input" placeholder="" />
+          </div>
         </div>
       </div>
       <% } %>
-      <div class="form-actions">
-        <% if (check.isNew) { %>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="submit" name="saveandadd" value="true" class="btn btn-primary">Save and add</button>
-        <a class="btn" href="<%= route %>/checks">Cancel</a>
-        <% } else { %>
-        <button type="submit" class="btn btn-primary">Save changes</button>
-        <a class="btn" href="<%= route %>/checks/<%= check._id %>">Cancel</a>
-        <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
-        <% } %>
+      <div class="col col-xs-12">
+        <div class="form-group">
+          <% if (check.isNew) { %>
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="submit" name="saveandadd" value="true" class="btn btn-primary">Save and add</button>
+          <a class="btn" href="<%= route %>/checks">Cancel</a>
+          <% } else { %>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+          <a class="btn" href="<%= route %>/checks/<%= check._id %>">Cancel</a>
+          <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
+          <% } %>
+        </div>
       </div>
-    </fieldset>
+    </div>
   </form>
 </div>
 <script src="<%= route %>/javascripts/jquery.tagsinput.min.js"></script>
@@ -131,7 +136,7 @@ function updatePollingIntervalTooltip() {
   }
 }
 $(document).ready(function() {
-  $('.uneditable-input').text(moment(parseInt($('.uneditable-input').html())).format('LLLL'));
+  $('.uneditable-input').val(moment(parseInt($('.uneditable-input').val())).format('LLLL'));
   $('#check_form button[name="delete"]').click(function() {
     if (!confirm("This will delete the check and related pings and stats.\nAre you sure?")) return false;
     $('#check_form input[name="_method"]').val('delete');

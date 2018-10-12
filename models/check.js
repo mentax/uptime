@@ -15,23 +15,28 @@ var Tag              = require('../models/tag');
 
 // main model
 var Check = new Schema({
-  name        : String,
-  type        : String,
-  url         : String,
-  interval    : { type: Number, default: 60000, min: 60000 }, // interval between two pings
-  maxTime     : { type: Number, default: 1500 },  // time under which a ping is considered responsive
-  alertTreshold : { type: Number, default: 1 },   // nb of errors from which to trigger a new CheckEvent
-  errorCount  : { type: Number, default: 0 },     // count number of errors
-  tags        : [String],
-  lastChanged : Date,
-  firstTested : Date,
-  lastTested  : Date,
-  isUp        : Boolean,
-  isPaused    : { type: Boolean, default: false },
-  uptime      : { type: Number, default: 0 },
-  downtime    : { type: Number, default: 0 },
-  qos         : {},
-  pollerParams : Schema.Types.Mixed,
+  name          : String,
+  type          : String,
+  url           : String,
+  statusCode    : String, 
+  validSSL      : { type: Boolean, default: true },
+  interval      : { type: Number, default: 60000, min: 60000 }, // interval between two pings
+  maxTime       : { type: Number, default: 1500 },   // time under which a ping is considered responsive
+  alertTreshold : { type: Number, default: 1 },    // nb of errors from which to trigger a new CheckEvent
+  errorCount    : { type: Number, default: 0 },      // count number of errors
+  errorCode     : String,
+  errorMessage  : String,
+  alertState    : { type: Boolean, default: false }, // state is true when errorCount greater than alertTreshold and already triggered notification 
+  tags          : [String],
+  lastChanged   : Date,
+  firstTested   : Date,
+  lastTested    : Date,
+  isUp          : Boolean,
+  isPaused      : { type: Boolean, default: false },
+  uptime        : { type: Number, default: 0 },
+  downtime      : { type: Number, default: 0 },
+  qos           : {},
+  pollerParams  : Schema.Types.Mixed,
 });
 Check.plugin(require('mongoose-lifecycle'));
 
@@ -86,8 +91,8 @@ Check.methods.togglePause = function() {
   this.lastChanged = new Date();
 };
 
-Check.methods.setLastTest = function(status, time, error) {
-  var now = time ? new Date(time) : new Date();
+Check.methods.setLastTest = function({ status, statusCode, timestamp, error, errorCode }) {
+  var now = timestamp ? new Date(timestamp) : new Date();
   var mustNotifyEvent = this.mustNotifyEvent(status);
 
   if (!this.firstTested) {
@@ -102,6 +107,19 @@ Check.methods.setLastTest = function(status, time, error) {
     this.uptime = 0;
     this.downtime = 0;
   }
+  
+  this.statusCode = statusCode;
+  this.errorCode = errorCode;
+  this.errorMessage = error;
+  switch(errorCode) {
+    case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE':
+      this.errorCode = errorCode
+      this.validSSL = false;
+      break;
+    default:
+      this.validSSL = true;
+      break;
+  }
 
   if (mustNotifyEvent) {
     var event = new CheckEvent({
@@ -109,14 +127,16 @@ Check.methods.setLastTest = function(status, time, error) {
       check: this,
       tags: this.tags,
       message: status ? 'up' : 'down',
+      statusCode: '',
       details: error
     });
+
     if (status && this.lastChanged && this.isUp != undefined) {
       // Check comes back up
       event.downtime = now.getTime() - this.lastChanged.getTime();
     }
     event.save();
-    this.markEventNotified();
+    this.changeAlertState(status);
   }
   var durationSinceLastChange = now.getTime() - this.lastChanged.getTime();
   if (status) {
@@ -136,31 +156,38 @@ Check.methods.mustNotifyEvent = function(status) {
     if (this.isUp != status) {
       // check goes down for the first time
       this.errorCount = 1;
-    }
-    if (this.errorCount < this.alertTreshold) {
-      // repeated down pings - increase error count until reaching the down alert treshold
+    } else {
       this.errorCount++;
-      return false;
     }
-    if (this.errorCount === this.alertTreshold) {
+
+    if (this.errorCount >= this.alertTreshold && this.alertState == false) {
       // enough down pings to trigger notification
       return true;
     }
+
     // error count higher than treshold, that means the alert was already sent
     return false;
   }
   // check is up
-  if (this.isUp != status && this.errorCount > this.alertTreshold) {
-    // check goes up after reaching the down alert treshold before
+  if (this.isUp != status && this.alertState) {
+    // reset errorCount because status is already up   
+    this.errorCount = 0; 
+ 
+    // turn "red light" off, trigger notificaiton
     return true;
   }
   // check either goes up after less than alertTreshold down pings, or is already up for long
   return false;
 };
 
-Check.methods.markEventNotified = function() {
-  // increase error count to disable notification if the next ping has the same status
-  this.errorCount = this.alertTreshold + 1;
+Check.methods.changeAlertState = function(status) { 
+  if (status) { 
+    // status up make "red light" off, no more alert state 
+    this.alertState = false;
+  } else {
+    // status down make "red light" on 
+    this.alertState = true; 
+  } 
 };
 
 Check.methods.getQosPercentage = function() {

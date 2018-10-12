@@ -1,5 +1,5 @@
 /**
- * HipChat plugin for the uptime project - https://github.com/fzaninotto/uptime
+ * VictorOps plugin for the uptime project - https://github.com/fzaninotto/uptime
  *
  * Thanks to:
  *  - DMathieu for the Campfire plugin - https://gist.github.com/dmathieu/5592418
@@ -34,6 +34,7 @@ var config = require('config').victorops;
 
 exports.initWebApp = function(options) {
   if (typeof config === 'undefined') {
+    console.log('\x1b[33m%s\x1b[0m', 'VictorOps configuration missing, plugin not initialized.');
 		return false;
 	}
 

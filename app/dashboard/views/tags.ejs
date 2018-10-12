@@ -53,7 +53,8 @@ jQuery(document).ready(function($) {
       $('#tags tbody').html(lines.join(''));
       $('#tags').trigger('update');
     }
-    if (tags) {
+
+    if (tags && tags.length > 0) {
       updateTagsSection(tags);
     } else {
       $.getJSON('/api/tags', updateTagsSection);
