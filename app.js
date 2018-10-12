@@ -115,7 +115,6 @@ router.get('/favicon.ico', function(req, res) {
 app.emit('afterLastRoute', app);
 
 app.use(config.base, router);
-console.log("CONFIG" + config.base)
 
 // Sockets
 var io = socketIo.listen(server);
