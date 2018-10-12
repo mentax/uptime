@@ -85,13 +85,13 @@ app.emit('beforeFirstRoute', app, apiApp);
   
 if (app.get('env') === 'development') {
   if (config.verbose) mongoose.set('debug', true);
-  app.use(express.static(__dirname + '/public'));
+  app.use(config.rewrite, express.static(__dirname + '/public'));
   app.use(errorHandler({ dumpExceptions: true, showStack: true }));
 }
 
 if (app.get('env') === 'production') {
   var oneYear = 31557600000;
-  app.use(express.static(__dirname + '/public', { maxAge: oneYear }));
+  app.use(config.rewrite, express.static(__dirname + '/public', { maxAge: oneYear }));
   app.use(errorHandler());
 }
 
