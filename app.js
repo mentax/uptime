@@ -115,7 +115,7 @@ app.emit('afterLastRoute', app);
 var io = socketIo.listen(server);
 
 if (app.get('env') === 'production') {
-  io.enable('browser client etag');
+  //io.enable('browser client etag');
   //io.set('log level', 1);
   io.set("transports", ["xhr-polling"]);
   io.set("polling duration", 10);
