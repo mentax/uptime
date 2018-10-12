@@ -112,7 +112,8 @@ router.get('/favicon.ico', function(req, res) {
 
 router.emit('afterLastRoute', app);
 
-app.use(config.base, router);
+app.use('/', router);
+app.use(config.base, express.static(__dirname + '/public'));
 
 // Sockets
 var io = socketIo.listen(server);
