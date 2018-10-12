@@ -33,6 +33,7 @@ a.start();
 // web front
 
 var app = module.exports = express();
+var router = express.Router();
 var server = http.createServer(app);
 
 // the following middlewares are only necessary for the mounted 'dashboard' app, 
@@ -88,20 +89,24 @@ if (app.get('env') === 'production') {
 }
 
 // Routes
+if (!config.base) config.base = "";
+
 app.emit('beforeApiRoutes', app, apiApp);
-app.use('/api', apiApp);
+router.use('/api', apiApp);
 
 app.emit('beforeDashboardRoutes', app, dashboardApp);
-app.use('/dashboard', dashboardApp);
-app.get('/', function(req, res) {
+router.use('/dashboard', dashboardApp);
+router.get('/', function(req, res) {
   res.redirect('/dashboard/status');
 });
 
-app.get('/favicon.ico', function(req, res) {
+router.get('/favicon.ico', function(req, res) {
   res.redirect(301, '/dashboard/favicon.ico');
 });
 
 app.emit('afterLastRoute', app);
+
+app.use(config.base, router);
 
 // Sockets
 var io = socketIo.listen(server);

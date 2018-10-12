@@ -97,23 +97,25 @@ if (app.get('env') === 'production') {
 }
 
 // Routes
+if (!config.base) config.base = "";
+
 app.emit('beforeApiRoutes', app, apiApp);
 router.use('/api', apiApp);
 
-router.emit('beforeDashboardRoutes', app, dashboardApp);
+app.emit('beforeDashboardRoutes', app, dashboardApp);
 router.use('/dashboard', dashboardApp);
 router.get('/', function(req, res) {
-  res.redirect('/dashboard/events');
+  res.redirect(config.base + '/dashboard/events');
 });
 
 router.get('/favicon.ico', function(req, res) {
-  res.redirect(301, '/dashboard/favicon.ico');
+  res.redirect(301, config.base + '/dashboard/favicon.ico');
 });
 
 app.emit('afterLastRoute', app);
 
-app.use('/', router);
-app.use(config.base, express.static(__dirname + '/public'));
+app.use(config.base, router);
+console.log("CONFIG" + config.base)
 
 // Sockets
 var io = socketIo.listen(server);
