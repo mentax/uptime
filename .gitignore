@@ -7,3 +7,6 @@ npm-debug.log
 
 .idea
 config/local.yaml
+
+package-lock.json
+tasks.json
