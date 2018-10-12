@@ -41,6 +41,7 @@ a.start();
 // web front
 
 var app = module.exports = express();
+var router = express.Router();
 var server = http.createServer(app);
 
 // the following middlewares are only necessary for the mounted 'dashboard' app, 
@@ -85,31 +86,33 @@ app.emit('beforeFirstRoute', app, apiApp);
   
 if (app.get('env') === 'development') {
   if (config.verbose) mongoose.set('debug', true);
-  app.use(config.rewrite, express.static(__dirname + '/public'));
-  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+  router.use(express.static(__dirname + '/public'));
+  router.use(errorHandler({ dumpExceptions: true, showStack: true }));
 }
 
 if (app.get('env') === 'production') {
   var oneYear = 31557600000;
-  app.use(config.rewrite, express.static(__dirname + '/public', { maxAge: oneYear }));
-  app.use(errorHandler());
+  router.use(express.static(__dirname + '/public', { maxAge: oneYear }));
+  router.use(errorHandler());
 }
 
 // Routes
-app.emit('beforeApiRoutes', app, apiApp);
-app.use('/api', apiApp);
+router.emit('beforeApiRoutes', app, apiApp);
+router.use('/api', apiApp);
 
-app.emit('beforeDashboardRoutes', app, dashboardApp);
-app.use('/dashboard', dashboardApp);
-app.get('/', function(req, res) {
+router.emit('beforeDashboardRoutes', app, dashboardApp);
+router.use('/dashboard', dashboardApp);
+router.get('/', function(req, res) {
   res.redirect('/dashboard/events');
 });
 
-app.get('/favicon.ico', function(req, res) {
+router.get('/favicon.ico', function(req, res) {
   res.redirect(301, '/dashboard/favicon.ico');
 });
 
-app.emit('afterLastRoute', app);
+router.emit('afterLastRoute', app);
+
+app.use(config.base, router);
 
 // Sockets
 var io = socketIo.listen(server);
