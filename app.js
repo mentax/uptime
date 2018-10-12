@@ -97,7 +97,7 @@ if (app.get('env') === 'production') {
 }
 
 // Routes
-router.emit('beforeApiRoutes', app, apiApp);
+app.emit('beforeApiRoutes', app, apiApp);
 router.use('/api', apiApp);
 
 router.emit('beforeDashboardRoutes', app, dashboardApp);
@@ -110,7 +110,7 @@ router.get('/favicon.ico', function(req, res) {
   res.redirect(301, '/dashboard/favicon.ico');
 });
 
-router.emit('afterLastRoute', app);
+app.emit('afterLastRoute', app);
 
 app.use('/', router);
 app.use(config.base, express.static(__dirname + '/public'));
