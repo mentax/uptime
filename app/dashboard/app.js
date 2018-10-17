@@ -35,7 +35,7 @@ app.use(function locals(req, res, next) {
   res.locals.addedCss = [];
   res.locals.renderCssTags = function (all) {
     if (all != undefined) {
-      return all.map(function(css) {
+      return all.map(function (css) {
         return '<link rel="stylesheet" href="' + req.baseUrl + '/stylesheets/' + css + '">';
       }).join('\n ');
     } else {
@@ -50,7 +50,10 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
 if (app.get('env') === 'development') {
-  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+  app.use(errorHandler({
+    dumpExceptions: true,
+    showStack: true
+  }));
 }
 
 if (app.get('env') === 'production') {
@@ -61,29 +64,49 @@ app.locals.version = moduleInfo.version
 
 // Routes
 
-app.get('/events', function(req, res) {
+app.get('/events', function (req, res) {
   res.render('events');
 });
 
-app.get('/status/:tag', function(req, res, next) {
-  Check.find({ tags: req.params.tag} ).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+app.get('/status/:tag', function (req, res, next) {
+  Check.find({
+    tags: req.params.tag
+  }).sort({
+    isUp: 1,
+    lastChanged: -1
+  }).exec(function (err, checks) {
     if (err) return next(err);
-    res.render('status', { layout: "status_layout.ejs", info: req.flash('info'), checks: checks, tag: req.params.tag });
+    res.render('status', {
+      layout: "status_layout.ejs",
+      info: req.flash('info'),
+      checks: checks,
+      tag: req.params.tag
+    });
   });
 });
 
-app.get('/checks', function(req, res, next) {
-  Check.find().sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+app.get('/checks', function (req, res, next) {
+  Check.find().sort({
+    isUp: 1,
+    lastChanged: -1
+  }).exec(function (err, checks) {
     if (err) return next(err);
-    res.render('checks', { info: req.flash('info'), checks: checks });
+    res.render('checks', {
+      info: req.flash('info'),
+      checks: checks
+    });
   });
 });
 
-app.get('/checks/new', function(req, res) {
-  res.render('check_new', { check: new Check(), pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
+app.get('/checks/new', function (req, res) {
+  res.render('check_new', {
+    check: new Check(),
+    pollerCollection: app.get('pollerCollection'),
+    info: req.flash('info')
+  });
 });
 
-app.post('/checks', function(req, res, next) {
+app.post('/checks', function (req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
@@ -92,23 +115,31 @@ app.post('/checks', function(req, res, next) {
   } catch (err) {
     return next(err);
   }
-  check.save(function(err) {
+  check.save(function (err) {
     if (err) return next(err);
     req.flash('info', 'New check has been created');
     res.redirect(req.baseUrl + (req.body.saveandadd ? '/checks/new' : ('/checks/' + check._id + '?type=hour&date=' + Date.now())));
   });
 });
 
-app.get('/checks/:id', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.get('/checks/:id', function (req, res, next) {
+  Check.findOne({
+    _id: req.params.id
+  }, function (err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
-    res.render('check', { check: check, info: req.flash('info'), req: req });
+    res.render('check', {
+      check: check,
+      info: req.flash('info'),
+      req: req
+    });
   });
 });
 
-app.get('/checks/:id/edit', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.get('/checks/:id/edit', function (req, res, next) {
+  Check.findOne({
+    _id: req.params.id
+  }, function (err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     var pollerDetails = [];
@@ -118,12 +149,12 @@ app.get('/checks/:id/edit', function(req, res, next) {
       pollerCollection: app.get('pollerCollection'),
       pollerDetails: pollerDetails.join(''),
       info: req.flash('info'),
-      req: req 
+      req: req
     });
   });
 });
 
-app.get('/pollerPartial/:type', function(req, res, next) {
+app.get('/pollerPartial/:type', function (req, res, next) {
   var poller;
   try {
     poller = app.get('pollerCollection').getForType(req.params.type);
@@ -135,8 +166,8 @@ app.get('/pollerPartial/:type', function(req, res, next) {
   res.send(pollerDetails.join(''));
 });
 
-app.put('/checks/:id', function(req, res, next) {
-  Check.findById(req.params.id, function(err, check) {
+app.put('/checks/:id', function (req, res, next) {
+  Check.findById(req.params.id, function (err, check) {
     if (err) return next(err);
     try {
       var dirtyCheck = req.body.check;
@@ -145,7 +176,7 @@ app.put('/checks/:id', function(req, res, next) {
     } catch (populationError) {
       return next(populationError);
     }
-    check.save(function(err2) {
+    check.save(function (err2) {
       if (err2) return next(err2);
       req.flash('info', 'Changes have been saved');
       res.redirect(req.baseUrl + '/checks/' + req.params.id);
@@ -153,11 +184,13 @@ app.put('/checks/:id', function(req, res, next) {
   });
 });
 
-app.delete('/checks/:id', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.delete('/checks/:id', function (req, res, next) {
+  Check.findOne({
+    _id: req.params.id
+  }, function (err, check) {
     if (err) return next(err);
     if (!check) return next(new Error('failed to load check ' + req.params.id));
-    check.remove(function(err2) {
+    check.remove(function (err2) {
       if (err2) return next(err2);
       req.flash('info', 'Check has been deleted');
       res.redirect(req.baseUrl + '/checks');
@@ -165,34 +198,54 @@ app.delete('/checks/:id', function(req, res, next) {
   });
 });
 
-app.get('/tags', function(req, res, next) {
-  Tag.find().sort({ name: 1 }).exec(function(err, tags) {
+app.get('/tags', function (req, res, next) {
+  Tag.find().sort({
+    name: 1
+  }).exec(function (err, tags) {
     if (err) return next(err);
-    res.render('tags', { info: req.flash('info'), tags: tags });
+    res.render('tags', {
+      info: req.flash('info'),
+      tags: tags
+    });
   });
 });
 
-app.get('/tags/:name', function(req, res, next) {
-  Tag.findOne({ name: req.params.name }, function(err, tag) {
+app.get('/tags/:name', function (req, res, next) {
+  Tag.findOne({
+    name: req.params.name
+  }, function (err, tag) {
     if (err) {
       return next(err);
     }
     if (!tag) return next(new Error('failed to load tag ' + req.params.name));
-    res.render('tag', { tag: tag, req: req });
+    res.render('tag', {
+      tag: tag,
+      req: req
+    });
   });
 });
 
-app.delete('/tags/:name', function(req, res, next) {
-  Tag.findOne({ name: req.params.name }, function(err, tag) {
+app.delete('/tags/:name', function (req, res, next) {
+  Tag.findOne({
+    name: req.params.name
+  }, function (err, tag) {
     if (err) {
       return next(err);
     }
     if (!tag) return next(new Error('failed to load tag ' + req.params.name));
     // Delete tag relation first in order to avoid magic respawn
-    Check.collection.update({ tags: tag.name }, { $pull: { tags: tag.name } }, { multi: true }, function(err2) {
+    Check.collection.update({
+      tags: tag.name
+    }, {
+      $pull: {
+        tags: tag.name
+      }
+    }, {
+      multi: true
+    }, function (err2) {
       if (err2) return next(err2);
       // Then, remove the tag
-      tag.remove(function(err3) {
+      tag.remove(function (err3) {
         if (err3) return next(err3);
         req.flash('info', 'Tag has been deleted');
         res.redirect(req.baseUrl + '/tags');
